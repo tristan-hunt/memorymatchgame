@@ -59,8 +59,30 @@ class Board extends React.Component {
   		return;
   	}
 
-
 	// some extra calculations if both cards are face up 
+  	if (activeCards[0] != null && activeCards[1] != null){
+
+  		// flip two cards back if they're not a pair
+	  	if (!(calculatePair(activeCards[0], activeCards[1], cardValues)))	 {
+	  		showFront[activeCards[0]] = false;
+	  		showFront[activeCards[1]] = false;
+	  		this.setState({
+	  			showFront: showFront,
+	  		})
+  		}
+
+	  	// reset activeCards
+  		activeCards = Array(2).fill(null);
+	}
+
+	// flip the clicked card over
+  	showFront[i] = true;
+
+  	// set active cards 
+  	var active = activeCards[0] === null ? 0 : 1;
+  	activeCards[active] = i;
+
+
   	if (activeCards[0] != null && activeCards[1] != null){
    		if (calculatePair(activeCards[0], activeCards[1], cardValues)) {
 	   		// increment current player's score
@@ -72,31 +94,11 @@ class Board extends React.Component {
 	  		}
   		}
 
-  		// flip two cards back if they're not a pair
-	  	else {
-	  		showFront[activeCards[0]] = false;
-	  		showFront[activeCards[1]] = false;
-	  		this.setState({
-	  			showFront: showFront,
-	  		})
-  		}
-
-	  	if (calculateWinner(this.state.playerScores)) {
-  			return;
-  		}
 
 	  	// it's the next player's turn
 	  	player1turn = !player1turn;	
-  		activeCards = Array(2).fill(null);
-	}
 
-	// flip the clicked card over
-  	showFront[i] = true;
-
-  	// set active cards 
-  	var active = activeCards[0] === null ? 0 : 1;
-  	activeCards[active] = i;
-
+  	}
 
   	// update our state
   	this.setState({
@@ -118,15 +120,26 @@ class Board extends React.Component {
   }
 
   render() {
-	let playerturn = this.state.player1turn ? 'Player 1\'s turn' : 'Player 2\'s turn';
+	let status = this.state.player1turn ? 'Player 1\'s turn' : 'Player 2\'s turn';
 	let player1score = 'Player 1: ' + this.state.playerScores[0];
 	let player2score = 'Player 2: ' + this.state.playerScores[1];
 	
+	if (calculateWinner(this.state.playerScores)){
+		if (this.state.playerScores[0] > this.state.playerScores[1]){
+			status = 'Player 1 Wins!';
+		}
+		else if (this.state.playerScores[1] > this.state.playerScores[0]) {
+			status = 'Player 2 Wins!';
+		}
+		else {
+			status = 'Tie game!';
+		}
+	}
+
 	return (
-		// TODO - this is a mess too 
       <div>
         <div className="status">
-        	<div>{playerturn}</div>
+        	<div>{status}</div>
         	<div>{player1score}</div>
         	<div>{player2score}</div>
         </div>
