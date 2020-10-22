@@ -1,0 +1,86 @@
+body {
+  font: 14px "Century Gothic", Futura, sans-serif;
+  margin: 20px;
+}
+
+ol, ul {
+  padding-left: 30px;
+}
+
+.board-row:after {
+  clear: both;
+  content: "";
+  display: table;
+}
+
+.status {
+  margin-bottom: 10px;
+}
+
+.card {
+  border: 1px solid #999;
+  float: left;
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 34px;
+  height: 142px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 100px;
+}
+
+.card-1 {
+  background-image: url('photos/small-chameleon.png');   
+}
+
+.card-2 {
+  background-image: url('photos/small-cheetah.png');   
+}
+
+.card-3 {
+  background-image: url('photos/small-deer.png');   
+}
+
+.card-4 {
+  background-image: url('photos/small-fox.png');   
+}
+
+.card-5 {
+  background-image: url('photos/small-giraffe.png');   
+}
+
+.card-6 {
+  background-image: url('photos/small-lioness.png');   
+}
+
+.card-7 {
+  background-image: url('photos/small-owl.png');   
+}
+
+.card-8 {
+  background-image: url('photos/small-seal.png');   
+}
+
+
+.cardBack {
+  background-image: url('photos/small-cardback.png');
+}
+
+.square:focus {
+  outline: none;
+}
+
+.kbd-navigation .square:focus {
+  background: #ddd;
+}
+
+.game {
+  display: flex;
+  flex-direction: row;
+}
+
+.game-info {
+  margin-left: 20px;
+}
