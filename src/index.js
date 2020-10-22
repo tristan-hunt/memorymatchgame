@@ -1,35 +1,23 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import AppBar from '@material-ui/core/AppBar';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import Container from '@material-ui/core/Container';
-
 import Grid from '@material-ui/core/Grid';
-import { palette, sizing, spacing } from '@material-ui/system';
-
-import { createStyles, makeStyles, Theme } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import IconButton from '@material-ui/core/IconButton';
-import MenuIcon from '@material-ui/icons/Menu';
 
 import _ from 'underscore'
 
 import './index.css';
-
-// TODO - Player Name setting
-// TODO - boardsize setting (difficulty setting)
-// TODO - number of players setting
-// TODO - new game button
-
 
 const BOARDWIDTH = 4;
 const BOARDHEIGHT = 4;
 const BOARDSIZE = BOARDWIDTH * BOARDHEIGHT;
 const NUMBER_OF_PLAYERS = 2;
 const PLAYER_NAMES = ["Player 1", "Player 2"];
+
 
 class Card extends React.Component {
 	constructor(props){
@@ -43,13 +31,16 @@ class Card extends React.Component {
 		return (
 			<Button 
 				className={`card ${this.props.flipped ? 'card-'+this.state.image : 'card-back'}`}
+				key={'button-card-'+this.state.image}
 				onClick={() => {
 					this.props.onClick();
 				}}>
+
 			</Button>
 		);		
 	}
 }
+
 
 class Game extends React.Component {
 	constructor(props){
@@ -62,10 +53,6 @@ class Game extends React.Component {
 			currentPlayer: 0,
 		}  
 	}
-
-  newGame() {
-  	console.log('new game!')
-  }
 
   handleClick(i) {
   	let showFront = this.state.showFront.slice();
@@ -113,13 +100,13 @@ class Game extends React.Component {
     		flipped={this.state.showFront[index]}
     		image={image}
     		onClick={() => this.handleClick(index)}
+    		key={"card-"+index}
 			/>
 		);
   }
 
 	render() {
-		// TODO - this depends on boardsize
-		let rowList = [];
+		let boardList = [];
 		for (var row = 0; row < BOARDHEIGHT; row++) {
 			let cardList = [];
 			for (var card = 0; card < BOARDWIDTH; card++) {
@@ -130,14 +117,15 @@ class Game extends React.Component {
 						m={1}
 						p={1}
 						style={{width: '6rem', heigh: '5rem'}}
+						key={"box-"+i}
 					>
 						{this.renderCard(i, this.state.cardValues[i])}
 					</Box>
 				)
 			};
 
-			rowList.push(
-				<Grid container className="board-row">
+			boardList.push(
+				<Grid container className="board-row" key={"board-row-"+row}>
 					{cardList}
         </Grid>
 			)
@@ -150,12 +138,12 @@ class Game extends React.Component {
 					<GameInfo className="game-info" playerScores={this.state.playerScores} currentPlayer={this.state.currentPlayer}/>
     			<Grid item xs={6}>
 						<Box className="game-board">
-							{rowList}
+							{boardList}
 						</Box>
       		</Grid>
 				</Grid>
 			</div>
-    	);
+  	);
 	}
 }
 
@@ -176,9 +164,8 @@ class GameInfo extends React.Component {
 		let scoreList = [];
 		scores.forEach((score, index) => {
 			scoreList.push(
-				<Grid item xs={12} sm={4}>
-					
-					<Box bgcolor="info.main" color="info.contrastText" p={2}>
+				<Grid item xs={12} sm={4} key={"grid-player-score-"+index}>
+					<Box bgcolor="info.main" color="info.contrastText" p={2} key={"player-score"+index}>
 	        	{PLAYER_NAMES[index]}: {score}
 		    	</Box>
 				</Grid>
@@ -193,7 +180,6 @@ class GameInfo extends React.Component {
 						{status}
         	</Box>
 				</Grid>
-	  		
 			</Grid>
 		)
 	}
@@ -206,8 +192,8 @@ class HeaderBar extends React.Component {
 	  	<div>
 	      <AppBar position="static">
 	        <Toolbar>
-	          <Typography variant="h6" className="title">
-	            Memory Match Game
+	          <Typography variant="h4" className="title">
+	            Memory Matching Game
 	          </Typography>
 	        </Toolbar>
 	      </AppBar>
@@ -229,7 +215,6 @@ class MemoryMatchApp extends React.Component {
 }
 
 
-
 function calculatePair(card1, card2, cardValues) {
 	if (card1 === null){
 		return;
@@ -245,6 +230,7 @@ function calculatePair(card1, card2, cardValues) {
 	return false;
 }
 
+
 function calculateWinner(scores) {
 	let sum = _.reduce(scores, (a, b)=>{return a+b});
 	if (sum === BOARDSIZE/2) {
@@ -257,6 +243,6 @@ function calculateWinner(scores) {
 // ========================================
 
 ReactDOM.render(
-  <MemoryMatchApp />,
+  <MemoryMatchApp/>,
   document.getElementById('root')
 );
