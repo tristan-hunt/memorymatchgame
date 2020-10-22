@@ -13,10 +13,6 @@ ol, ul {
   display: table;
 }
 
-.status {
-  margin-bottom: 10px;
-}
-
 .card {
   border: 1px solid #999;
   float: left;
@@ -29,6 +25,21 @@ ol, ul {
   padding: 0;
   text-align: center;
   width: 100px;
+  perspective: 1000px;
+}
+
+.card-front {
+  position: relative;
+  width: 100%;
+  heigh: 100%;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  transform: rotateY(180deg);
+}
+
+.card-back {
+  background-image: url('photos/small-cardback.png');
+  transform: rotateY(180deg);
 }
 
 .card-1 {
@@ -57,22 +68,14 @@ ol, ul {
 
 .card-7 {
   background-image: url('photos/small-owl.png');   
+
 }
 
 .card-8 {
   background-image: url('photos/small-seal.png');   
 }
 
-
-.cardBack {
-  background-image: url('photos/small-cardback.png');
-}
-
-.square:focus {
-  outline: none;
-}
-
-.kbd-navigation .square:focus {
+.kbd-navigation .card:focus {
   background: #ddd;
 }
 

@@ -1,9 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import { palette } from '@material-ui/system';
+
 import _ from 'underscore'
+
 import './index.css';
 
-
+// TODO - use material-ui
+// TODO - Player Name setting
 // TODO - boardsize setting (difficulty setting)
 // TODO - number of players setting
 // TODO - new game button
@@ -13,6 +21,8 @@ import './index.css';
 
 const BOARDSIZE = 16;
 const NUMBER_OF_PLAYERS = 2;
+const PLAYER_NAMES = ["Player 1", "Player 2"];
+
 
 class Card extends React.Component {
 	constructor(props){
@@ -24,45 +34,49 @@ class Card extends React.Component {
 
 	render () {
 		return (
-			<button 
-				className={`card ${this.props.flipped ? 'card-'+this.state.image : 'cardBack'}`}
+			<Button 
+				className={`card ${this.props.flipped ? 'card-front card-'+this.state.image : 'card-back'}`}
 				onClick={() => {
 					this.props.onClick();
 				}}>
-			</button>
+			</Button>
 		);		
 	}
 }
 
-class Board extends React.Component {
-  constructor(props){
-  	super(props);
-  	this.state = {
-  		cardValues: _.shuffle([1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8]), 
+class Game extends React.Component {
+	constructor(props){
+		super(props);
+		this.state = {
+			cardValues:_.shuffle(Array.from({length: BOARDSIZE}, (_, i) => Math.ceil((i+1)/2))),
+			showFront: Array(BOARDSIZE).fill(false),
+			activeCards: Array(2).fill(null),
+			playerScores: Array(NUMBER_OF_PLAYERS).fill(0),
+			currentPlayer: 0,
+		}  
+	}
+
+  newGame() {
+  	console.log('new game!')
+  	this.setState = {
+  		cardValues:_.shuffle(Array.from({length: BOARDSIZE}, (_, i) => Math.ceil((i+1)/2))),
   		showFront: Array(BOARDSIZE).fill(false),
   		activeCards: Array(2).fill(null),
   		playerScores: Array(NUMBER_OF_PLAYERS).fill(0),
-  		player1turn: true,
-  	};
+  		currentPlayer: 0,
+   	}
   }
 
   handleClick(i) {
-  	// data is immutable
   	let showFront = this.state.showFront.slice();
-	let activeCards = this.state.activeCards.slice();
-	let playerScores = this.state.playerScores.slice();
+		let activeCards = this.state.activeCards.slice();
+		let playerScores = this.state.playerScores.slice();
   	let cardValues = this.state.cardValues;
-	let player1turn = this.state.player1turn;
+		let currentPlayer = this.state.currentPlayer;
 
-  	// ignore case of a clicked card already being turned over
-  	if (showFront[i] === true){
-  		return;
-  	}
+  	if (showFront[i] === true){ return; }
 
-	// some extra calculations if both cards are face up 
   	if (activeCards[0] != null && activeCards[1] != null){
-
-  		// flip two cards back if they're not a pair
 	  	if (!(calculatePair(activeCards[0], activeCards[1], cardValues)))	 {
 	  		showFront[activeCards[0]] = false;
 	  		showFront[activeCards[1]] = false;
@@ -70,41 +84,25 @@ class Board extends React.Component {
 	  			showFront: showFront,
 	  		})
   		}
-
-	  	// reset activeCards
   		activeCards = Array(2).fill(null);
-	}
+		}
 
-	// flip the clicked card over
   	showFront[i] = true;
 
-  	// set active cards 
   	var active = activeCards[0] === null ? 0 : 1;
   	activeCards[active] = i;
 
-
   	if (activeCards[0] != null && activeCards[1] != null){
    		if (calculatePair(activeCards[0], activeCards[1], cardValues)) {
-	   		// increment current player's score
-	  		if (player1turn){
-	  			playerScores[0] = playerScores[0] + 1;
-	  		}
-	  		else {
-	  			playerScores[1] = playerScores[1] + 1;
-	  		}
-  		}
-
-
-	  	// it's the next player's turn
-	  	player1turn = !player1turn;	
-
+	  		playerScores[currentPlayer] = playerScores[currentPlayer] + 1;
+			}
+	  	currentPlayer = (currentPlayer+1)%NUMBER_OF_PLAYERS;	
   	}
 
-  	// update our state
   	this.setState({
   		playerScores: playerScores,
   		showFront: showFront,
-  		player1turn: player1turn,
+  		currentPlayer: currentPlayer,
   		activeCards: activeCards,
   	});
   }
@@ -115,80 +113,159 @@ class Board extends React.Component {
     		flipped={this.state.showFront[index]}
     		image={image}
     		onClick={() => this.handleClick(index)}
-		/>
-	);
+			/>
+		);
   }
 
-  render() {
-	let status = this.state.player1turn ? 'Player 1\'s turn' : 'Player 2\'s turn';
-	let player1score = 'Player 1: ' + this.state.playerScores[0];
-	let player2score = 'Player 2: ' + this.state.playerScores[1];
-	
-	if (calculateWinner(this.state.playerScores)){
-		if (this.state.playerScores[0] > this.state.playerScores[1]){
-			status = 'Player 1 Wins!';
-		}
-		else if (this.state.playerScores[1] > this.state.playerScores[0]) {
-			status = 'Player 2 Wins!';
-		}
-		else {
-			status = 'Tie game!';
-		}
+	render() {
+		// TODO - this depends on boardsize
+		let rows = [0, 1, 2, 3];
+		let rowList = [];
+		rows.forEach(row => {
+			let cards = [0, 1, 2, 3];
+			let cardList = [];
+			cards.forEach(card => {
+				let i = card + 4*row;
+				cardList.push(
+					<Box
+						boxShadow={3}
+						m={1}
+						p={1}
+						style={{width: '6rem', heigh: '5rem'}}
+					>
+						{this.renderCard(i, this.state.cardValues[i])}
+					</Box>
+				)
+			});
+
+			rowList.push(
+				<Grid container className="board-row">
+					{cardList}
+        </Grid>
+			)
+		})
+
+		return (
+			<div>
+				<Grid container spacing={1} className="game">
+		      		<Grid item xs={12} className="menu-bar">
+						<MenuBar newGame={() => this.newGame()}/>
+		        	</Grid>
+					<GameInfo className="game-info" playerScores={this.state.playerScores} currentPlayer={this.state.currentPlayer}/>
+	      			<Grid item xs={12} className="game-board">
+						{rowList}
+	        		</Grid>
+				</Grid>
+			</div>
+    	);
 	}
-
-	return (
-      <div>
-        <div className="status">
-        	<div>{status}</div>
-        	<div>{player1score}</div>
-        	<div>{player2score}</div>
-        </div>
-        <div className="board-row">
-          {this.renderCard(0, this.state.cardValues[0])}
-          {this.renderCard(1, this.state.cardValues[1])}
-          {this.renderCard(2, this.state.cardValues[2])}
-          {this.renderCard(3, this.state.cardValues[3])}
-        </div>
-        <div className="board-row">
-          {this.renderCard(4, this.state.cardValues[4])}
-          {this.renderCard(5, this.state.cardValues[5])}
-          {this.renderCard(6, this.state.cardValues[6])}
-          {this.renderCard(7, this.state.cardValues[7])}
-        </div>
-        <div className="board-row">
-          {this.renderCard(8, this.state.cardValues[8])}
-          {this.renderCard(9, this.state.cardValues[9])}
-          {this.renderCard(10, this.state.cardValues[10])}
-          {this.renderCard(11, this.state.cardValues[11])}
-        </div>
-        <div className="board-row">
-          {this.renderCard(12, this.state.cardValues[12])}
-          {this.renderCard(13, this.state.cardValues[13])}
-          {this.renderCard(14, this.state.cardValues[14])}
-          {this.renderCard(15, this.state.cardValues[15])}
-        </div>
-      </div>
-    );
-  }
 }
 
-class Game extends React.Component {
-  render() {
-    return (
-      <div className="game">
-        <div className="game-board">
-          <Board />
-        </div>
-        <div className="game-info">
-          <div>{/* status */}</div>
-          <ol>{/* TODO */}</ol>
-        </div>
-      </div>
-    );
-  }
+class GameInfo extends React.Component {
+	render() {
+		let status = PLAYER_NAMES[this.props.currentPlayer] + "'s Turn";
+		if (calculateWinner(this.props.playerScores)){
+			if (this.props.playerScores.every((val, i) => val === this.props.playerScores[0])){
+				status = "Tie Game";
+			}
+			else {	
+				// TODO - what if there is a tie among winners? 
+				let maxIndex = _.indexOf(this.props.playerScores, _.max(this.props.playerScores));
+				status = PLAYER_NAMES[maxIndex] + " wins!";
+			}
+		}
+
+		let scores = this.props.playerScores;
+		let scoreList = [];
+		scores.forEach((score, index) => {
+			scoreList.push(
+				<Grid item xs={12} sm={4}>
+					<Box bgcolor="info.main" color="info.contrastText" p={2}>
+			        	{PLAYER_NAMES[index]}: {score}
+			    	</Box>
+				</Grid>
+			)
+		})
+
+		return (
+			<Grid container spacing={1} className="game">
+		  	<Grid item xs={12} sm={4}>
+				<Box className="status" bgcolor="info.main" color="info.contrastText" p={2}>
+					{status}
+        </Box>
+			</Grid>
+	  		{scoreList}
+			</Grid>
+		)
+	}
 }
+
+
+class MenuBar extends React.Component {
+	render() {
+		return (
+			<div className="menu-bar">
+    		<NewGameButton newGame={this.props.newGame}/>
+  			<DifficultyButton/>
+  			<NumberOfPlayersButton/>
+    	</div>
+		)
+	}
+}
+
+class DifficultyButton extends React.Component {
+	render() {
+		return (
+			<Button 
+				variant="contained"
+				className="difficulty-btn"
+			>
+				Difficulty
+			</Button>
+		)
+	}
+}
+
+class NumberOfPlayersButton extends React.Component {
+	render() {
+		return (
+			<Button 
+				variant="contained"
+				className="number-of-players-btn"
+			>
+				Number of Players
+			</Button>
+		)
+	}
+}
+
+class NewGameButton extends React.Component {
+	render() {
+		return (
+			<Button 
+				variant="contained"
+				className="new-game-btn"
+				onClick={() => {
+					this.props.newGame();
+			}}>
+				New Game
+			</Button>
+		)
+	}
+}
+
 	
-	
+class MemoryMatchApp extends React.Component {
+	render() {
+		return (
+			<div className="memory-match-app">
+				<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+   				<Game/>
+			</div>
+		)
+	}
+}
+
 function calculatePair(card1, card2, cardValues) {
 	if (card1 === null){
 		return;
@@ -216,6 +293,6 @@ function calculateWinner(scores) {
 // ========================================
 
 ReactDOM.render(
-  <Game />,
+  <MemoryMatchApp />,
   document.getElementById('root')
 );
