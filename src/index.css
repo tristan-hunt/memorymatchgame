@@ -28,18 +28,8 @@ ol, ul {
   perspective: 1000px;
 }
 
-.card-front {
-  position: relative;
-  width: 100%;
-  heigh: 100%;
-  transition: transform 0.8s;
-  transform-style: preserve-3d;
-  transform: rotateY(180deg);
-}
-
 .card-back {
   background-image: url('photos/small-cardback.png');
-  transform: rotateY(180deg);
 }
 
 .card-1 {
@@ -82,8 +72,18 @@ ol, ul {
 .game {
   display: flex;
   flex-direction: row;
+  margin-top: 10px !important;
 }
 
 .game-info {
   margin-left: 20px;
+  margin-top: 20px;
+}
+
+.menuButton: {
+  marginRight: theme.spacing(2),
+}
+
+.title: {
+  flexGrow: 1,
 }
